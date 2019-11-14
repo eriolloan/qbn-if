@@ -1,19 +1,24 @@
-import * as Axis from "./axes_classes";
+import * as Axis from "./axes_classes/index.mjs";
 import dynamicClass from "../helpers/dynamicClass.mjs";
+import Collection from "../collections/index.mjs";
 
-class Corpus {
+class Corpus extends Collection {
   constructor(axisType) {
-    this.main = {
-      mainAxis: {},
-      main: []
-    };
-    this.main.mainAxis = new dynamicClass(
-      Axis.PointAxesClasses,
+    super();
+    this.axis = new dynamicClass(
+      Axis.AxesSubTypes,
       axisType,
       ("Main axis", "CORPUS")
     );
-    this.threads = { threads: [] };
-    this.dynamic = { dynamic: [] };
+    this.main = [];
+    this.threads = [];
+    this.dynamic = [];
+  }
+
+  getPosition(folioID) {
+    const folio = this.main.find(folio => folio.id === folioID);
+    const position = folio.in;
+    return position;
   }
 }
 

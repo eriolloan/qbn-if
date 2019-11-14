@@ -1,75 +1,39 @@
-import toNestedObject from "./story_components/helpers/toNestedObject.mjs";
-//import Corpus from "./story_components/corpus";
-import Store from "./story_components/store/index.mjs";
-import filterWithConditions from "./story_components/helpers/filterWithConditions.mjs";
+import { toNestedEntries } from "./story_components/helpers/nest.mjs";
 
-const headerElement = document.getElementById("page-header", "rounded-top");
-headerElement.classList.add("padding-1");
+//import Store from "./story_components/store/index.mjs";
+import Context from "./story_components/context/index.mjs";
+import Corpus from "./story_components/corpus/index.mjs";
+import myCorpus from "../assets/project/myCorpus.mjs";
+
+const headerElement = document.getElementById("page-header");
 const titleElement = document.getElementById("page-title");
-titleElement.parentNode.classList.add(
-  "horizontal-padding-4",
-  "vertical-padding-0"
-);
 const textElement = document.getElementById("text");
-textElement.classList.add("horizontal-padding-4", "vertical-padding-0", "p");
-const choiceButtonsElement = document.getElementById("choice-buttons");
+const actionButtonsElements = document.getElementById("choice-buttons");
 
-let context = { reading: { current: {} }, protagonist: { inventory: {} } };
+const corpus = new Corpus("Drama");
+Object.assign(corpus, myCorpus);
+
+const context = new Context();
 const current = context.reading.current;
-//const corpus = new Corpus("Drama");
-const store = new Store();
-/*store.createEntity(
-  "item",
-  "blueGoo",
-  "Jar of blue goo",
-  "A jar found in the grass. A thick blue liquid moves inside."
-);*/
-console.log(store);
 
 function startReading() {
-  context = {
-    reading: {
-      current: {
-        axes: [{ axis: "axis_00", part: 0 }],
-        page: "",
-        fragmentIndex: 0,
-        fragmentsArrayLength: 0
-      },
-      history: {
-        folios: []
-      }
-    },
-    drama: [],
-    protagonist: {
-      inventory: {}
-    },
-    entities: []
-  };
-
   showPage("role", "START");
 }
 
 function showPage(key, value) {
-  // get the page at this pageID from the corpus
-  current.page = getPage(key, value);
-  showHeader(current.page);
-  showContent(current.page);
+  // display first page object with corresponding key/value pair
+  const page = getPage(key, value);
+  context.setCurrent(page);
+  showHeader(page);
+  showContent(page);
 }
 
 function getPage(key, value) {
-  // return first page with pageID
+  // return first page with corresponding key/value pair
   const page = corpus.main.find(
-    folio => folio.subType === "PAGE" && folio[key] === value
+    folio => folio.type === "PAGE" && folio[key] === value
   );
-  setCurrent(page);
   return page;
-}
-
-function setCurrent(page) {
-  current.page = page.in;
-  current.page = page.id;
-  current.fragmentIndex = 0;
-  current.fragmentsArrayLength = page.fragments.length;
 }
 
 function showHeader(page) {
@@ -87,21 +51,23 @@ function renderHeader(header) {
   headerElement.innerText = header;
 }
 
-function showContent() {
-  clearChoices();
-  showTitle();
-  renderCurrentFragment();
-  showPossibleActions();
+function showContent(page) {
+  clearActions();
+  showTitle(page);
+  renderCurrentFragment(page);
+  showPossibleActions(page);
 }
 
 function renderCurrentFragment() {
   // TODO validate fragments with 'requiredContext'
-  textElement.innerText = current.page.fragments[current.fragmentIndex].text;
+  const page = corpus.main.find(page => page.id === current.page);
+  textElement.innerText = page.fragments[current.fragmentIndex].text;
 }
 
-function showTitle() {
-  if (current.fragmentIndex === 0 && current.page.title) {
-    renderTitle();
+function showTitle(page) {
+  // display title only when displaying the first fragment
+  if (current.fragmentIndex === 0 && page.title) {
+    renderTitle(page);
   } else {
     hideTitle();
   }
@@ -111,21 +77,27 @@ function hideTitle() {
   titleElement.classList.add("hidden");
 }
 
-function renderTitle() {
+function renderTitle(page) {
   titleElement.classList.remove("hidden");
-  titleElement.innerText = current.page.title;
+  titleElement.innerText = page.title;
 }
 
-function showPossibleActions() {
-  showCurrentPageActions();
+function showPossibleActions(page) {
+  showPageActions(page);
+  /* renderDynamicChoicesButtons()*/
+
+  // rounding last choice button
+  if (actionButtonsElements.lastChild) {
+    actionButtonsElements.lastChild.classList.add("rounded-bottom");
+  }
 }
 
-function showCurrentPageActions() {
-  if (current.fragmentIndex + 1 >= current.fragmentsArrayLength) {
-    renderStaticChoicesButtons();
+function showPageActions(page) {
+  if (current.fragmentIndex >= current.fragmentsArrayLength - 1) {
+    renderStaticChoicesButtons(page);
     console.log("Last fragment reached. Rendering page choices");
   } else {
-    renderNextButton();
+    renderNextButton(page);
     console.log(
       `${current.fragmentsArrayLength -
         current.fragmentIndex} Fragments remaining in page. Rendering next button`
@@ -138,78 +110,70 @@ function showCurrentPageActions() {
   );
 }
 
-function clearChoices() {
-  //clears previous choice buttons
-  while (choiceButtonsElement.firstChild) {
-    choiceButtonsElement.removeChild(choiceButtonsElement.firstChild);
+function clearActions() {
+  //clears all previously shown choice buttons
+  while (actionButtonsElements.firstChild) {
+    actionButtonsElements.removeChild(actionButtonsElements.firstChild);
   }
 }
-function renderNextButton() {
-  const nextButton = document.createElement("nextButton");
+
+function renderNextButton(page) {
+  const nextButton = document.createElement("button");
   nextButton.innerHTML =
-    current.page.fragments[current.fragmentIndex].buttonText || "N E X T ";
+    page.fragments[current.fragmentIndex].buttonText || "N E X T ";
   const nextIcon = document.createElement("i");
   nextIcon.innerHTML = "double_arrow";
   nextIcon.classList.add("btn-icon", "material-icon");
   nextButton.appendChild(nextIcon);
-  nextButton.classList.add("choice-btn", "next-btn", "rounded-bottom");
+  nextButton.classList.add("choice-btn", "next-btn");
   nextButton.addEventListener("click", () => {
-    console.log("'next' was clicked");
-    selectNextFragment();
+    console.log("'next' button was clicked");
+    selectNextFragment(page);
   });
-  choiceButtonsElement.appendChild(nextButton);
+  actionButtonsElements.appendChild(nextButton);
 }
 
-function selectNextFragment() {
+function selectNextFragment(page) {
   if (current.fragmentIndex < current.fragmentsArrayLength) {
     current.fragmentIndex += 1;
-    showContent();
+    showContent(page);
   }
 }
 
-function renderStaticChoicesButtons() {
+function renderStaticChoicesButtons(page) {
   //populate the button grid with choices from the page
-  if (current.page.choices) {
-    current.page.choices.forEach(choice => {
+  if (page.choices) {
+    page.choices.forEach(choice => {
       if (verifyChoice(choice)) {
         const button = document.createElement("button");
         button.innerHTML = choice.caption;
         button.classList.add("choice-btn");
-        button.addEventListener("click", () => selectChoice(choice));
-        choiceButtonsElement.appendChild(button);
+        button.addEventListener("click", () => setContextFromChoice(choice));
+        actionButtonsElements.appendChild(button);
       }
     });
-    // rounding last choice button
-    choiceButtonsElement.lastChild.classList.add("rounded-bottom");
   }
 }
 
 function renderDynamicChoicesButtons() {
-  //populate the button grid with choices from the page
-  if (current.page.choices) {
-    current.page.choices.forEach(choice => {
-      if (verifyChoice(choice)) {
-        const button = document.createElement("button");
-        button.innerHTML = choice.caption;
-        button.classList.add("choice-btn");
-        button.addEventListener("click", () => selectChoice(choice));
-        choiceButtonsElement.appendChild(button);
-      }
-    });
-    // rounding last choice button
-    choiceButtonsElement.lastChild.classList.add("rounded-bottom");
-  }
+  // TODO
 }
 
 function verifyChoice(choice) {
-  return choice.requiredContext == null || choice.requiredContext(context);
+  return (
+    choice.requiredContext == null ||
+    context.validateConditions(choice.requiredContext)
+  );
+  /*Object.entries(toNestedEntries(choice.requiredContext)).every(
+      key => context[key] === toNestedEntries(choice.requiredContext)[key]
+    )*/
 }
 
-function selectChoice(choice) {
+function setContextFromChoice(choice) {
   current.fragmentIndex = 0;
   if (choice.setContext) {
     //return an array of objects that can be merged with the context
-    const changes = toNestedObject(choice.setContext);
+    const changes = toNestedEntries(choice.setContext);
     // merge
     changes.forEach(change => {
       Object.assign(context, change);
@@ -218,13 +182,8 @@ function selectChoice(choice) {
     console.log(`updated context`);
     console.log(context);
   }
-  updateHistory(current.page.id);
+  context.updateHistory(current.page);
   showPage("id", choice.targetFolio);
-}
-
-function updateHistory(folioID) {
-  context.reading.history.folios.unshift(folioID);
-  console.log(`folio with ID ${folioID} added to history`);
 }
 
 function getCandidateFolios() {
@@ -245,205 +204,5 @@ function getCandidateFolios() {
       break;
   }
 }*/
-const corpus = {
-  axis: {
-    id: "axis_00",
-    caption: "Drama axis for 'Main'",
-    axisType: "Drama",
-    sectionType: "Act",
-    pointType: "Plot point",
-    scope: "CORPUS",
-    parts: [
-      { id: "point_00", partType: "point", caption: "Start" },
-      { id: "section_01", partType: "section", caption: "Act I" },
-      { id: "point_01", partType: "point", caption: "from Act I to Act II" },
-      { id: "section_02", partType: "section", caption: "Act II" }
-    ]
-  },
-  main: [
-    {
-      id: 0,
-      in: "point_00",
-      type: "FOLIO",
-      subType: "PAGE",
-      role: "START",
-      title: "Random Book",
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text: "Press start to read"
-        }
-      ],
-      choices: [
-        {
-          caption: "START",
-          setContext: {},
-          targetFolio: 1
-        }
-      ]
-    },
-    {
-      id: 1,
-      in: "section_01",
-      type: "FOLIO",
-      subType: "PAGE",
-      role: "START",
-      title: "Where is this?",
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text:
-            "You wake up in a strange place.\n Red leaves above you gently swing in the breeze. You stand up an look around."
-        },
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text:
-            " It seems you fell asleep under a tree by the side of a road. Except for this peculiar red tree and the road linking one end of the horizon to another, nothing disturbs the windy meadows you woke up in.",
-          buttonText: "Let's get going then !"
-        },
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text:
-            "As you move towards the road, a sudden spark of blue light catches your eye. \n\n It only briefly appeared as you moved but it was coming from something in the grass...",
-          buttonText: "...but what is this?"
-        },
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text:
-            "Searching in the cold wet grass, your hand eventually reaches a small jar filled with blue goo."
-        }
-      ],
-      choices: [
-        {
-          caption: "Take the goo",
-          setContext: {
-            "protagonist.inventory.blueGoo": true
-          },
-          targetFolio: 2
-        },
-        {
-          caption: "Leave the goo",
-          targetFolio: 2
-        }
-      ]
-    },
-    {
-      id: 2,
-      in: "section_01",
-      type: "FOLIO",
-      subType: "PAGE",
-      title: "The Merchant",
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text:
-            "You venture forth in search of answers.\n After miles of walking, you come accross a man sitting on a wooden chest. He looks at you, then glances at the jar you kept in your hand."
-        }
-      ],
-      choices: [
-        {
-          caption: "Trade the goo for a sword",
-          requiredContext: currentContext =>
-            currentContext.protagonist.inventory.blueGoo,
-          setContext: {
-            "protagonist.inventory.blueGoo": false,
-            "protagonist.inventory.sword": true
-          },
-          targetFolio: 3
-        },
-        {
-          caption: "Trade the goo for a shield",
-          requiredContext: currentContext =>
-            currentContext.protagonist.inventory.blueGoo,
-          setContext: {
-            "protagonist.inventory.blueGoo": false,
-            "protagonist.inventory.shield": true
-          },
-          targetFolio: 3
-        },
-        {
-          caption: "Ignore the merchant",
-          targetFolio: 3
-        }
-      ]
-    },
-    {
-      id: 3,
-      in: "section_01",
-      type: "FOLIO",
-      subType: "PAGE",
-      title: "Do something",
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text: "You need to use something."
-        }
-      ],
-      choices: [
-        {
-          caption: "Use the sword",
-          requiredContext: currentContext =>
-            currentContext.protagonist.inventory.sword,
-          targetFolio: 4
-        },
-        {
-          caption: "Use the shield",
-          requiredContext: currentContext =>
-            currentContext.protagonist.inventory.shield,
-          targetFolio: 4
-        },
-        {
-          caption: "Use the blue goo",
-          requiredContext: currentContext =>
-            currentContext.protagonist.inventory.blueGoo,
-          targetFolio: 4
-        },
-        {
-          caption: "Do nothing",
-          targetFolio: 4
-        }
-      ]
-    },
-    {
-      id: 4,
-      in: "section_01",
-      type: "FOLIO",
-      subType: "PAGE",
-      role: "END",
-      title: "The End",
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text: "That's all folks! You reached the last page."
-        }
-      ]
-    }
-  ],
-  threads: [],
-  dynamic: [
-    {
-      id: "dynamic_01",
-      type: "FOLIO",
-      subType: "PAGE",
-      title: "Dynamic page insertion",
-      anchor: { after: 1 },
-      fragments: [
-        {
-          type: "FRAGMENT",
-          subType: "PARAGRAPH",
-          text: "This is a text from a dynamically inserted page."
-        }
-      ]
-    }
-  ]
-};
 
 startReading();
