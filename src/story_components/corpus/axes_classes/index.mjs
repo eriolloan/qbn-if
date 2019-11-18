@@ -35,11 +35,10 @@ class AxisWithPoints extends Axis {
 }
 
 class Section {
-  constructor(adress, scope) {
+  constructor(scope) {
     this.scope = scope;
     this.superType = "STRUCTURE";
     this.type = "SECTION";
-    this.content = []; // contained folios or axis
   }
 }
 
