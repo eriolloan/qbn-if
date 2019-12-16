@@ -20,7 +20,8 @@ const myCorpus = {
       superType: "FOLIO",
       type: "PAGE",
       role: "START",
-      title: "The Blue Goo Book",
+      title: "Sample Book",
+      titleStyle: "h2",
       fragments: [
         {
           superType: "FRAGMENT",
@@ -48,7 +49,7 @@ const myCorpus = {
           superType: "FRAGMENT",
           type: "PARAGRAPH",
           text:
-            "You wake up in a strange place.\n Red leaves above you gently swing in the breeze. You stand up an look around."
+            "You wake up in a strange place.\n Red leaves above you gently swing in the breeze. You stand up and look around."
         },
         {
           superType: "FRAGMENT",
@@ -129,7 +130,7 @@ const myCorpus = {
       in: ["axis_00", "section_01"],
       superType: "FOLIO",
       type: "PAGE",
-      title: "Do something",
+      title: "Use something",
       fragments: [
         {
           superType: "FRAGMENT",

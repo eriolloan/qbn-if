@@ -40,7 +40,7 @@ body,
 .container {
   display: grid;
   grid-template-rows: auto 1fr;
-  width: 560px;
+  max-width: 560px;
   height: 100%;
   background-color: rgb(254, 254, 252);
   border-radius: 4px;
@@ -56,6 +56,8 @@ body,
 .page-content {
   padding-top: 2rem;
   padding-bottom: 3rem;
+  padding-left: 4rem;
+  padding-right: 4rem;
   display: flex;
   align-content: center;
   flex-wrap: wrap;
@@ -66,7 +68,7 @@ body,
   width: 100%;
 }
 
-#page-header {
+#ui-header {
   text-align: right;
   font-size: 0.8rem;
   letter-spacing: 0.03em;
@@ -76,22 +78,17 @@ body,
   text-transform: uppercase;
 }
 
-#page-title-container {
-  padding: 0rem 4rem;
-}
-
 #page-title {
   font-weight: 700;
   color: rgb(90, 94, 116);
 
 }
 
-#text {
+#page-fragment {
   color: rgb(90, 94, 116);
   font-size: 1rem;
   font-weight: 300;
   letter-spacing: 0.01em;
-  padding: 0rem 4rem;
 }
 
 
@@ -286,4 +283,32 @@ sup {
 
 sub {
   bottom: -0.25em;
+}
+
+
+@media (max-width: 700px) {
+
+  .container-wrapper {
+    height: 100%;
+  }
+
+  .container {
+    border-radius: 0px;
+    clip-path: inset(0px round 0px);
+  }
+
+  .rounded-top {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+  }
+
+  .rounded-bottom {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+
+  .page-content {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
 }

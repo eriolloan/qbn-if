@@ -5,10 +5,11 @@ import Context from "./story_components/context/index.mjs";
 import Corpus from "./story_components/corpus/index.mjs";
 import myCorpus from "../assets/project/myCorpus.mjs";
 
-const headerElement = document.getElementById("page-header");
+const uiHeaderElement = document.getElementById("ui-header");
 const titleElement = document.getElementById("page-title");
-const textElement = document.getElementById("text");
-const actionButtonsElements = document.getElementById("choice-buttons");
+const titleContainerElement = document.getElementById("page-title-container");
+const textElement = document.getElementById("page-fragment");
+const actionButtonsElements = document.getElementById("ui-choice-buttons");
 
 const corpus = new Corpus("Drama");
 Object.assign(corpus, myCorpus);
@@ -24,7 +25,7 @@ function showPage(key, value) {
   // display first page object with corresponding key/value pair
   const page = getPage(key, value);
   context.setCurrent(page);
-  showHeader(page);
+  showUIHeader(page);
   showContent(page);
 }
 
@@ -36,19 +37,19 @@ function getPage(key, value) {
   return page;
 }
 
-function showHeader(page) {
-  let header;
+function showUIHeader(page) {
+  let uiHeader;
   if (page.title) {
-    header = `${page.title}  ■  p.${page.id}`;
-    renderHeader(header);
+    uiHeader = `${page.title}  ■  p.${page.id}`;
+    renderUIHeader(uiHeader);
   } else {
-    header = `p.${page.id}`;
-    renderHeader(header);
+    uiHeader = `p.${page.id}`;
+    renderUIHeader(uiHeader);
   }
 }
 
-function renderHeader(header) {
-  headerElement.innerText = header;
+function renderUIHeader(uiHeader) {
+  uiHeaderElement.innerText = uiHeader;
 }
 
 function showContent(page) {
@@ -59,7 +60,7 @@ function showContent(page) {
 }
 
 function renderCurrentFragment() {
-  // TODO validate fragments with 'requiredContext'
+  // TODO validate fragments with a 'requiredContext' key, currently only pages are validated.
   const page = corpus.main.find(page => page.id === current.page);
   textElement.innerText = page.fragments[current.fragmentIndex].text;
 }
@@ -79,6 +80,13 @@ function hideTitle() {
 
 function renderTitle(page) {
   titleElement.classList.remove("hidden");
+  if (page.titleStyle) {
+    titleContainerElement.classList = page.titleStyle;
+    titleElement.classList = page.titleStyle;
+  } else {
+    titleContainerElement.classList = "h3";
+    titleElement.classList = "h3";
+  }
   titleElement.innerText = page.title;
 }
 
