@@ -25,16 +25,26 @@ function showPage(key, value) {
   // display first page object with corresponding key/value pair
   const page = getPage(key, value);
   context.setCurrent(page);
+  startPageTransition();
   showUIHeader(page);
   showContent(page);
+  //completePageTransition();
 }
 
-function getPage(key, value) {
-  // return first page with corresponding key/value pair
-  const page = corpus.main.find(
+function getPage(key, value, location = "main") {
+  // return first page with corresponding key/value pair in location
+  const page = corpus[location].find(
     folio => folio.type === "PAGE" && folio[key] === value
   );
   return page;
+}
+
+function startPageTransition() {
+  document.getElementById("transition-container").classList.remove("collapsed");
+}
+
+function completePageTransition() {
+  document.getElementById("transition-container").classList.remove("expanded");
 }
 
 function showUIHeader(page) {
@@ -60,7 +70,7 @@ function showContent(page) {
 }
 
 function renderCurrentFragment() {
-  // TODO validate fragments with a 'requiredContext' key, currently only pages are validated.
+  // TODO validate fragments with a 'requiredContext' key (currently only pages are validated).
   const page = corpus.main.find(page => page.id === current.page);
   textElement.innerText = page.fragments[current.fragmentIndex].text;
 }
@@ -92,7 +102,7 @@ function renderTitle(page) {
 
 function showPossibleActions(page) {
   showPageActions(page);
-  /* renderDynamicChoicesButtons()*/
+  // TODO renderDynamicChoicesButtons()
 
   // rounding last choice button
   if (actionButtonsElements.lastChild) {

@@ -32,12 +32,17 @@ body,
   display: none;
 }
 
-.container-wrapper {
-  box-shadow: 0 4px 18px -8px rgb(48, 53, 81);
+#reader {
   height: 80%;
 }
 
-.container {
+#container-wrapper {
+  position: relative;
+  box-shadow: 0 4px 18px -8px rgb(48, 53, 81);
+  height: 100%;
+}
+
+#page-container {
   display: grid;
   grid-template-rows: auto 1fr;
   max-width: 560px;
@@ -45,6 +50,19 @@ body,
   background-color: rgb(254, 254, 252);
   border-radius: 4px;
   clip-path: inset(0px round 4px);
+}
+
+#transition-container {
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  height: 100%;
+  background-color: royalblue;
+  transition: all 0.5s easeInOut 1S;
+}
+
+.collapsed {
+  width: 0px;
 }
 
 .content-scrollable {
@@ -288,11 +306,11 @@ sub {
 
 @media (max-width: 700px) {
 
-  .container-wrapper {
+  #reader {
     height: 100%;
   }
 
-  .container {
+  #page-container {
     border-radius: 0px;
     clip-path: inset(0px round 0px);
   }
