@@ -25,10 +25,9 @@ function showPage(key, value) {
   // display first page object with corresponding key/value pair
   const page = getPage(key, value);
   context.setCurrent(page);
-  startPageTransition();
+  showPageTransition();
   showUIHeader(page);
   showContent(page);
-  //completePageTransition();
 }
 
 function getPage(key, value, location = "main") {
@@ -39,12 +38,21 @@ function getPage(key, value, location = "main") {
   return page;
 }
 
-function startPageTransition() {
-  document.getElementById("transition-container").classList.remove("collapsed");
-}
+function showPageTransition() {
+  const transitionContainer = document.createElement("div");
+  transitionContainer.setAttribute("id", "transition-container");
 
-function completePageTransition() {
-  document.getElementById("transition-container").classList.remove("expanded");
+  if (document.getElementById("transition-container")) {
+    document
+      .getElementById("container-wrapper")
+      .removeChild(transitionContainer);
+  } else {
+    const pageContainer = document.getElementById("container-wrapper")
+      .firstChild;
+    document
+      .getElementById("container-wrapper")
+      .insertBefore(transitionContainer, pageContainer);
+  }
 }
 
 function showUIHeader(page) {
