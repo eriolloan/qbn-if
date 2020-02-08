@@ -8,7 +8,7 @@ import myCorpus from "../assets/project/myCorpus.mjs";
 const uiHeaderElement = document.getElementById("ui-header");
 const titleElement = document.getElementById("page-title");
 const titleContainerElement = document.getElementById("page-title-container");
-const textElement = document.getElementById("page-fragment");
+const fragmentContainerElement = document.getElementById("fragment-container");
 const actionButtonsElements = document.getElementById("ui-choice-buttons");
 
 const corpus = new Corpus("Drama");
@@ -25,7 +25,7 @@ function showPage(key, value) {
   // display first page object with corresponding key/value pair
   const page = getPage(key, value);
   context.setCurrent(page);
-  showPageTransition();
+  // showPageTransition();
   showUIHeader(page);
   showContent(page);
 }
@@ -38,6 +38,7 @@ function getPage(key, value, location = "main") {
   return page;
 }
 
+/*
 function showPageTransition() {
   const transitionContainer = document.createElement("div");
   transitionContainer.setAttribute("id", "transition-container");
@@ -54,6 +55,7 @@ function showPageTransition() {
       .insertBefore(transitionContainer, pageContainer);
   }
 }
+*/
 
 function showUIHeader(page) {
   let uiHeader;
@@ -80,7 +82,17 @@ function showContent(page) {
 function renderCurrentFragment() {
   // TODO validate fragments with a 'requiredContext' key (currently only pages are validated).
   const page = corpus.main.find(page => page.id === current.page);
-  textElement.innerText = page.fragments[current.fragmentIndex].text;
+  destroyPreviousFragment();
+  const fragmentElement = document.createElement("p");
+  fragmentElement.id = "page-fragment";
+  fragmentElement.innerText = page.fragments[current.fragmentIndex].text;
+  fragmentContainerElement.appendChild(fragmentElement);
+}
+
+function destroyPreviousFragment() {
+  while (fragmentContainerElement.firstChild) {
+    fragmentContainerElement.removeChild(fragmentContainerElement.firstChild);
+  }
 }
 
 function showTitle(page) {

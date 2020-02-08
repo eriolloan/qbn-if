@@ -84,7 +84,7 @@ body,
   padding-left: 4rem;
   padding-right: 4rem;
   display: flex;
-  align-content: center;
+  align-content: flex-start;
   flex-wrap: wrap;
   justify-content: flex-start;
 }
@@ -106,7 +106,7 @@ body,
 #page-title {
   font-weight: 700;
   color: rgb(90, 94, 116);
-
+  animation: appear .6s ease-out;
 }
 
 #page-fragment {
@@ -114,6 +114,24 @@ body,
   font-size: 1rem;
   font-weight: 300;
   letter-spacing: 0.01em;
+  animation: appear .6s ease-out;
+}
+
+@keyframes appear {
+
+  0% {
+    opacity: 0%;
+    line-height: 2rem;
+  }
+
+  50% {
+    opacity: 25%;
+  }
+
+  100% {
+    opacity: 100%;
+    line-height: inherit;
+  }
 }
 
 
